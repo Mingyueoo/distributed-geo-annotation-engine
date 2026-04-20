@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+dist/
+build/
+.venv/
+venv/
+env/
+
+# Flask / SQLAlchemy
+instance/
+*.db
+*.sqlite3
+
+# Uploads / data
+uploads/
+/tmp/
+
+# Environment
+.env
+.env.local
+*.env
+
+# Docker volumes
+pgdata/
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Tests
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Node (if frontend tooling added later)
+node_modules/
+
+

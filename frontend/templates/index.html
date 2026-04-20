@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>GeoLabeler — DestinE Annotation Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="/static/css/main.css"/>
+</head>
+<body>
+<div id="app">
+
+  <!-- ── AUTH SCREEN ─────────────────────────────────── -->
+  <div id="auth-screen" class="screen active">
+    <div class="auth-bg">
+      <canvas id="globe-canvas"></canvas>
+      <div class="auth-grid"></div>
+    </div>
+    <div class="auth-panel">
+      <div class="auth-logo">
+        <span class="logo-mark">◈</span>
+        <span class="logo-text">GeoLabeler</span>
+      </div>
+      <p class="auth-sub">Distributed Geo-Annotation Engine</p>
+
+      <div class="tab-row">
+        <button class="tab-btn active" data-tab="login">Sign In</button>
+        <button class="tab-btn" data-tab="register">Register</button>
+      </div>
+
+      <!-- Login Form -->
+      <form id="login-form" class="auth-form active">
+        <div class="field-group">
+          <label>Username or Email</label>
+          <input type="text" id="login-username" placeholder="scientist@esa.int" required/>
+        </div>
+        <div class="field-group">
+          <label>Password</label>
+          <input type="password" id="login-password" placeholder="••••••••" required/>
+        </div>
+        <button type="submit" class="btn-primary">Sign In →</button>
+        <p id="login-error" class="form-error"></p>
+      </form>
+
+      <!-- Register Form -->
+      <form id="register-form" class="auth-form">
+        <div class="field-group">
+          <label>Full Name</label>
+          <input type="text" id="reg-name" placeholder="Dr. Ada Lovelace"/>
+        </div>
+        <div class="field-group">
+          <label>Username</label>
+          <input type="text" id="reg-username" placeholder="ada_lovelace" required/>
+        </div>
+        <div class="field-group">
+          <label>Email</label>
+          <input type="email" id="reg-email" placeholder="ada@esa.int" required/>
+        </div>
+        <div class="field-group">
+          <label>Password</label>
+          <input type="password" id="reg-password" placeholder="••••••••" required/>
+        </div>
+        <button type="submit" class="btn-primary">Create Account →</button>
+        <p id="register-error" class="form-error"></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- ── MAIN APP ─────────────────────────────────────── -->
+  <div id="main-screen" class="screen">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <span class="logo-mark">◈</span>
+        <span class="logo-text">GeoLabeler</span>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="#" class="nav-item active" data-view="dashboard">
+          <span class="nav-icon">⬡</span> Dashboard
+        </a>
+        <a href="#" class="nav-item" data-view="datasets">
+          <span class="nav-icon">◧</span> Datasets
+        </a>
+        <a href="#" class="nav-item" data-view="annotate">
+          <span class="nav-icon">◈</span> Annotate
+        </a>
+        <a href="#" class="nav-item" data-view="review">
+          <span class="nav-icon">◉</span> Review
+        </a>
+        <a href="#" class="nav-item" data-view="export">
+          <span class="nav-icon">◫</span> Export
+        </a>
+      </nav>
+      <div class="sidebar-user">
+        <div class="user-avatar" id="user-avatar">A</div>
+        <div class="user-info">
+          <span id="user-name-sidebar">Loading…</span>
+          <span id="user-role-sidebar" class="user-role">annotator</span>
+        </div>
+        <button id="logout-btn" class="logout-btn" title="Sign out">⏻</button>
+      </div>
+    </aside>
+
+    <!-- Main content area -->
+    <main class="content">
+
+      <!-- ── DASHBOARD VIEW ── -->
+      <div id="view-dashboard" class="view active">
+        <div class="view-header">
+          <h1>Mission Control</h1>
+          <p>Overview of annotation activity across all datasets</p>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span class="stat-label">Total Datasets</span>
+            <span class="stat-value" id="stat-datasets">—</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Images Uploaded</span>
+            <span class="stat-value" id="stat-images">—</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Annotations Created</span>
+            <span class="stat-value" id="stat-annotations">—</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Avg. Completion</span>
+            <span class="stat-value" id="stat-completion">—</span>
+          </div>
+        </div>
+        <div class="dashboard-grid">
+          <section class="panel">
+            <h2 class="panel-title">Recent Datasets</h2>
+            <div id="recent-datasets-list" class="dataset-list"></div>
+          </section>
+          <section class="panel">
+            <h2 class="panel-title">Activity Feed</h2>
+            <div id="activity-feed" class="activity-feed">
+              <p class="muted">No recent activity</p>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <!-- ── DATASETS VIEW ── -->
+      <div id="view-datasets" class="view">
+        <div class="view-header">
+          <div>
+            <h1>Datasets</h1>
+            <p>Manage Sentinel and climate simulation datasets</p>
+          </div>
+          <button class="btn-primary" id="new-dataset-btn">+ New Dataset</button>
+        </div>
+
+        <div class="filters-bar">
+          <input type="text" id="dataset-search" placeholder="Search datasets…" class="search-input"/>
+          <select id="filter-type" class="select-input">
+            <option value="">All types</option>
+            <option value="sentinel_optical">Sentinel Optical</option>
+            <option value="sentinel_sar">Sentinel SAR</option>
+            <option value="climate_simulation">Climate Simulation</option>
+            <option value="multispectral">Multispectral</option>
+            <option value="other">Other</option>
+          </select>
+          <select id="filter-status" class="select-input">
+            <option value="">All statuses</option>
+            <option value="active">Active</option>
+            <option value="completed">Completed</option>
+            <option value="archived">Archived</option>
+          </select>
+        </div>
+
+        <div id="datasets-grid" class="datasets-grid"></div>
+        <div id="datasets-pagination" class="pagination"></div>
+      </div>
+
+      <!-- ── ANNOTATE VIEW ── -->
+      <div id="view-annotate" class="view">
+        <div class="view-header">
+          <div>
+            <h1>Annotation Studio</h1>
+            <p id="annotate-dataset-name">Select a dataset to begin</p>
+          </div>
+          <div class="annotate-controls">
+            <select id="annotate-dataset-select" class="select-input"></select>
+            <button class="btn-secondary" id="ai-suggest-btn">⚡ AI Suggest</button>
+          </div>
+        </div>
+
+        <div class="annotate-workspace">
+          <!-- Image strip -->
+          <div class="image-strip" id="image-strip">
+            <p class="muted strip-placeholder">Select a dataset above</p>
+          </div>
+
+          <!-- Canvas area -->
+          <div class="canvas-wrapper" id="canvas-wrapper">
+            <div class="canvas-placeholder" id="canvas-placeholder">
+              <span>◈</span>
+              <p>Select an image to start annotating</p>
+            </div>
+            <canvas id="annotation-canvas"></canvas>
+            <div id="canvas-overlay-labels"></div>
+          </div>
+
+          <!-- Tools + labels panel -->
+          <div class="tools-panel">
+            <div class="tool-section">
+              <h3>Tool</h3>
+              <div class="tool-buttons">
+                <button class="tool-btn active" data-tool="bbox" title="Bounding Box">⬜</button>
+                <button class="tool-btn" data-tool="polygon" title="Polygon">⬡</button>
+                <button class="tool-btn" data-tool="point" title="Point">◉</button>
+                <button class="tool-btn" data-tool="pan" title="Pan">✥</button>
+              </div>
+            </div>
+
+            <div class="tool-section">
+              <h3>Label Class</h3>
+              <div id="label-classes" class="label-classes"></div>
+            </div>
+
+            <div class="tool-section">
+              <h3>Annotations (<span id="ann-count">0</span>)</h3>
+              <div id="annotation-list" class="annotation-list"></div>
+            </div>
+
+            <div class="tool-section">
+              <button class="btn-primary full-width" id="save-annotations-btn">Save</button>
+              <button class="btn-ghost full-width" id="clear-annotations-btn">Clear All</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── REVIEW VIEW ── -->
+      <div id="view-review" class="view">
+        <div class="view-header">
+          <h1>Review Queue</h1>
+          <p>Approve or reject pending annotations</p>
+        </div>
+        <div id="review-list" class="review-list">
+          <p class="muted">Loading review queue…</p>
+        </div>
+      </div>
+
+      <!-- ── EXPORT VIEW ── -->
+      <div id="view-export" class="view">
+        <div class="view-header">
+          <h1>Export</h1>
+          <p>Download labels in your preferred format</p>
+        </div>
+        <div class="export-grid">
+          <div class="export-panel">
+            <h2>Select Dataset</h2>
+            <select id="export-dataset-select" class="select-input full-width"></select>
+          </div>
+          <div class="export-panel">
+            <h2>Format</h2>
+            <div class="format-cards">
+              <label class="format-card">
+                <input type="radio" name="export-format" value="coco" checked/>
+                <span class="format-name">COCO JSON</span>
+                <span class="format-desc">Standard object detection format</span>
+              </label>
+              <label class="format-card">
+                <input type="radio" name="export-format" value="geojson"/>
+                <span class="format-name">GeoJSON</span>
+                <span class="format-desc">Geographic vector features</span>
+              </label>
+              <label class="format-card">
+                <input type="radio" name="export-format" value="csv"/>
+                <span class="format-name">CSV</span>
+                <span class="format-desc">Tabular annotation data</span>
+              </label>
+            </div>
+          </div>
+          <div class="export-panel">
+            <button class="btn-primary" id="export-btn">Export Dataset ↓</button>
+            <div id="export-result" class="export-result"></div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ── MODALS ─────────────────────────────────────────── -->
+  <div id="modal-overlay" class="modal-overlay hidden">
+    <div class="modal" id="modal-box">
+      <button class="modal-close" id="modal-close">✕</button>
+      <div id="modal-content"></div>
+    </div>
+  </div>
+
+  <!-- Toast notifications -->
+  <div id="toast-container"></div>
+
+</div><!-- #app -->
+
+<script src="/static/js/api.js"></script>
+<script src="/static/js/canvas.js"></script>
+<script src="/static/js/app.js"></script>
+</body>
+</html>
