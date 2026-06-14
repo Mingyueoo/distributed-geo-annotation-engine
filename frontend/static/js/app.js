@@ -299,6 +299,7 @@
   let currentImage   = null;
   let currentLabelClasses = [];
   let pendingAnnotations = [];
+  let thumbnailObjectUrls = [];
 
   // Init canvas
   Canvas.init(
@@ -384,6 +385,8 @@
 
   function renderImageStrip() {
     const strip = $('image-strip');
+    thumbnailObjectUrls.forEach(url => URL.revokeObjectURL(url));
+    thumbnailObjectUrls = [];
     strip.innerHTML = '';
     if (!currentImages.length) {
       strip.innerHTML = '<p class="strip-placeholder">No images in dataset</p>';
@@ -397,11 +400,16 @@
         thumb.innerHTML = '<div class="annotated-dot"></div>';
       }
       const el = document.createElement('img');
-      el.src = Api.thumbnailUrl(img.id);
       el.onerror = () => { el.style.display = 'none'; };
       thumb.appendChild(el);
       thumb.onclick = () => selectImage(img);
       strip.appendChild(thumb);
+      Api.thumbnailBlobUrl(img.id)
+        .then(url => {
+          thumbnailObjectUrls.push(url);
+          el.src = url;
+        })
+        .catch(() => { el.style.display = 'none'; });
     });
   }
 

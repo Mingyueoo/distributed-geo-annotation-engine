@@ -1,7 +1,10 @@
 import os
-from app import create_app
-from app.config import config
-from app.extensions import socketio
+# from app import create_app
+# from app.config import config
+# from app.extensions import socketio
+from . import create_app
+from .config import config
+from .extensions import socketio
 
 env = os.environ.get("FLASK_ENV", "development")
 app = create_app(config.get(env, config["default"]))

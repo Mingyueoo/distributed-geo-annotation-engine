@@ -27,6 +27,20 @@ const Api = (() => {
     return json;
   }
 
+  async function blobUrl(path) {
+    const headers = {};
+    if (_token) headers['Authorization'] = `Bearer ${_token}`;
+
+    const res = await fetch(`${API_BASE}${path}`, { headers });
+    if (res.status === 401) {
+      clearToken();
+      window.location.reload();
+    }
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const blob = await res.blob();
+    return URL.createObjectURL(blob);
+  }
+
   return {
     setToken, clearToken, hasToken,
     get:    (p)      => request('GET',    p),
@@ -67,6 +81,7 @@ const Api = (() => {
       request('POST', `/images/dataset/${datasetId}/upload`, formData, true),
     imageFileUrl: (id) => `${API_BASE}/images/${id}/file`,
     thumbnailUrl: (id) => `${API_BASE}/images/${id}/thumbnail`,
+    thumbnailBlobUrl: (id) => blobUrl(`/images/${id}/thumbnail`),
 
     /* ANNOTATIONS */
     getAnnotations: (imageId, params = {}) => {
